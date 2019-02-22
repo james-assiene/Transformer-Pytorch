@@ -11,14 +11,14 @@ import torch
 
 def scaled_dot_product_attention(Q, K, V, mask=False):
     d_k = K.size(2) # because 0 is the batch dimension, 1 the individual dimension
-    attention_scores = Q @ K.t() / torch.sqrt(d_k)
+    attention_scores = Q.bmm(K.transpose(1,2)) / torch.sqrt(d_k)
 
     if mask:
         attention_scores = torch.tril(attention_scores)
         attention_scores[attention_scores == 0] = -float("Inf")
     
-    attention_weights = attention_scores.softmax(1)
+    attention_weights = attention_scores.softmax(axis=1)
     
-    new_representation = attention_weights @ V
+    new_representation = attention_weights.bmm(V)
     
     return new_representation
